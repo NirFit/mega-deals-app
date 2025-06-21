@@ -10,7 +10,16 @@ from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 # --- App Configuration ---
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'a_very_secret_key_that_should_be_changed'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'site.db')
+
+# --- Database Configuration ---
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    # Use the Render PostgreSQL database
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+else:
+    # Fallback to local SQLite database for development
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'site.db')
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
