@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}המבצע הסתיים - מגה דילים{% endblock %}
+
+{% block content %}
+<div class="expired-container">
+    <h1>אופס, המבצע כבר לא בתוקף!</h1>
+    <p>מבצעים טובים נחטפים מהר. לפעמים הקופונים מוגבלים בזמן או במלאי.</p>
+    <p>ממליצים לך לחזור לעמוד הראשי ולמצוא מבצעים חמים אחרים!</p>
+    <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">חזרה לעמוד הראשי</a>
+</div>
+{% endblock %} 

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}מגה דילים - מציאות שוות לפני כולם{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>מבצעים שווים לפני כולם</h1>
+    <p class="subtitle">אנחנו סורקים את הרשת כדי למצוא לכם את הדילים הכי חמים. הרשמו וקבלו התראות אישיות!</p>
+    {% if not current_user.is_authenticated %}
+    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">הרשמה מהירה בחינם</a>
+    {% endif %}
+</section>
+
+<section class="deals-section">
+    <div class="category-filters">
+        <a href="{{ url_for('index') }}" class="btn-category {% if not current_category %}active{% endif %}">הכל</a>
+        {% for category in categories %}
+            <a href="{{ url_for('index', category=category) }}" class="btn-category {% if current_category == category %}active{% endif %}">{{ category }}</a>
+        {% endfor %}
+    </div>
+
+    <div class="grid-container">
+        {% for deal in deals %}
+        <div class="deal-card no-image">
+            <div class="deal-content">
+                <span class="deal-category">{{ deal.category }}</span>
+                <h3>{{ deal.title }}</h3>
+                <p class="description">{{ deal.description }}</p>
+                <div class="price-container">
+                    <span class="new-price">{{ deal.new_price }}</span>
+                    {% if deal.old_price %}
+                    <span class="old-price">{{ deal.old_price }}</span>
+                    {% endif %}
+                </div>
+                {% if deal.coupon_code %}
+                <div class="coupon-container">
+                    <span>קוד קופון:</span>
+                    <strong class="coupon-code">{{ deal.coupon_code }}</strong>
+                </div>
+                {% endif %}
+                <a href="{{ url_for('deal_expired') }}" class="btn btn-primary" target="_blank">לפרטים ורכישה</a>
+            </div>
+        </div>
+        {% else %}
+        <p>לא נמצאו מבצעים בקטגוריה זו.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="request-coupon">
+    <h2>לא מצאתם את מה שחיפשתם?</h2>
+    <p>ספרו לנו איזה מוצר אתם רוצים לקנות, ואנחנו ננסה למצוא עבורכם קופון שווה!</p>
+    <a href="mailto:requests@megadeals.com?subject=בקשת קופון" class="btn btn-secondary">שלחו לנו בקשה</a>
+</section>
+{% endblock %} 
