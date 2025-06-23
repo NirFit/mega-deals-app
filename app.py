@@ -128,57 +128,54 @@ def logout():
     flash('התנתקת בהצלחה.', 'success')
     return redirect(url_for('index'))
 
-# --- Helper function to create DB and seed data ---
-def create_and_seed_db():
-    with app.app_context():
-        # Drop all tables to start fresh on each run (for development)
-        db.drop_all()
-        db.create_all()
+@app.cli.command('init-db')
+def init_db_command():
+    """Creates the database tables and populates them with initial data."""
+    db.drop_all()
+    db.create_all()
 
-        # Check if deals already exist
-        if Deal.query.first() is None:
-            deals_data = [
-                # קטגוריה: מחשבים וציוד היקפי
-                {'title': 'כרטיס מסך GeForce RTX 4070', 'description': 'KSP - כרטיס מסך עוצמתי לגיימינג.', 'old_price': '3,500 ₪', 'new_price': '2,899 ₪', 'deal_link': '#', 'coupon_code': 'MEGA150', 'category': 'מחשבים וציוד היקפי'},
-                {'title': 'כיסא גיימינג Secretlab Titan', 'description': 'הכיסא האולטימטיבי לגיימרים וליוצרי תוכן.', 'old_price': '2,500 ₪', 'new_price': '2,100 ₪', 'deal_link': '#', 'coupon_code': 'GAMINGX', 'category': 'מחשבים וציוד היקפי'},
-                {'title': 'מסך מחשב Dell UltraSharp U2723QE', 'description': 'מסך 4K עם דיוק צבעים מדהים למקצוענים.', 'old_price': '3,800 ₪', 'new_price': '3,100 ₪', 'deal_link': '#', 'coupon_code': 'DELLPRO', 'category': 'מחשבים וציוד היקפי'},
-                {'title': 'מקלדת מכנית Logitech MX Mechanical', 'description': 'מקלדת אלחוטית, שקטה ומדויקת.', 'old_price': '700 ₪', 'new_price': '550 ₪', 'deal_link': '#', 'coupon_code': 'LOGI20', 'category': 'מחשבים וציוד היקפי'},
-                
-                # קטגוריה: אוזניות וסאונד
-                {'title': 'אוזניות Sony WH-1000XM5', 'description': 'Amazon US - מבטלות רעשים מהטובות בעולם.', 'old_price': '1,800 ₪', 'new_price': '1,250 ₪', 'deal_link': '#', 'coupon_code': 'SONYDEAL', 'category': 'אוזניות וסאונד'},
-                {'title': 'רמקול Bluetooth נייד JBL Flip 6', 'description': 'רמקול עמיד למים עם סאונד עוצמתי.', 'old_price': '500 ₪', 'new_price': '380 ₪', 'deal_link': '#', 'coupon_code': 'JBLFLIP', 'category': 'אוזניות וסאונד'},
-                
-                # קטגוריה: מוצרי חשמל לבית
-                {'title': 'שואב אבק Roborock S8', 'description': 'Aliexpress - הדור החדש של השואבים הרובוטיים.', 'old_price': '3,200 ₪', 'new_price': '2,450 ₪', 'deal_link': '#', 'coupon_code': 'MEGA200', 'category': 'מוצרי חשמל לבית'},
-                {'title': 'מכונת קפה Nespresso', 'description': 'LastPrice - מכונת קפה מעוצבת ואיכותית.', 'old_price': '800 ₪', 'new_price': '550 ₪', 'deal_link': '#', 'coupon_code': 'COFFEE10', 'category': 'מוצרי חשמל לבית'},
-                {'title': 'בלנדר מוט Braun MultiQuick 9', 'description': 'בלנדר עוצמתי עם שלל אביזרים נלווים.', 'old_price': '600 ₪', 'new_price': '450 ₪', 'deal_link': '#', 'coupon_code': 'BRAUN25', 'category': 'מוצרי חשמל לבית'},
-                {'title': 'מטהר אוויר Xiaomi Smart Air Purifier 4', 'description': 'שומר על אוויר נקי בבית, שליטה מהאפליקציה.', 'old_price': '750 ₪', 'new_price': '600 ₪', 'deal_link': '#', 'coupon_code': 'AIRPURE', 'category': 'מוצרי חשמל לבית'},
-
-                # קטגוריה: ספורט וטיולים
-                {'title': 'נעלי ריצה ASICS Gel-Kayano', 'description': 'Amazon DE - נעלי ריצה מקצועיות למרחקים.', 'old_price': '750 ₪', 'new_price': '580 ₪', 'deal_link': '#', 'coupon_code': 'RUN4U', 'category': 'ספורט וטיולים'},
-                {'title': 'שעון חכם Garmin Fenix 7', 'description': 'שעון ספורט מתקדם עם GPS ומפות מובנות.', 'old_price': '3,000 ₪', 'new_price': '2,550 ₪', 'deal_link': '#', 'coupon_code': 'GARMIN15', 'category': 'ספורט וטיולים'},
-                {'title': 'תרמיל טיולים Osprey Atmos AG 65', 'description': 'תרמיל נוח ומאוורר לטרקים ארוכים.', 'old_price': '1,200 ₪', 'new_price': '950 ₪', 'deal_link': '#', 'coupon_code': 'OSPREY10', 'category': 'ספורט וטיולים'},
-
-                # קטגוריה: סלולר
-                {'title': 'סמארטפון Samsung Galaxy S24', 'description': 'Ivory - מכשיר הדגל החדש של סמסונג.', 'old_price': '4,200 ₪', 'new_price': '3,800 ₪', 'deal_link': '#', 'coupon_code': 'GALAXY5', 'category': 'סלולר'},
-                {'title': 'מטען נייד Anker PowerCore 20000', 'description': 'סוללה ניידת עוצמתית עם טעינה מהירה.', 'old_price': '250 ₪', 'new_price': '180 ₪', 'deal_link': '#', 'coupon_code': 'ANKERDEAL', 'category': 'סלולר'},
-                {'title': 'מגן מסך Spigen Glas.tR EZ Fit', 'description': 'מגן זכוכית איכותי עם התקנה קלה.', 'old_price': '120 ₪', 'new_price': '80 ₪', 'deal_link': '#', 'coupon_code': 'SPIGEN10', 'category': 'סלולר'},
-
-                # קטגוריה: טיפוח ויופי
-                {'title': 'מכונת גילוח Philips Series 9000', 'description': 'גילוח צמוד ונוח, מתאים לעור רגיש.', 'old_price': '900 ₪', 'new_price': '650 ₪', 'deal_link': '#', 'coupon_code': 'SHAVEUP', 'category': 'טיפוח ויופי'},
-                {'title': 'מייבש שיער Dyson Supersonic', 'description': 'מייבש שיער מהיר ושקט, מונע נזקי חום.', 'old_price': '2,000 ₪', 'new_price': '1,650 ₪', 'deal_link': '#', 'coupon_code': 'DYSON100', 'category': 'טיפוח ויופי'},
-                
-                # קטגוריה: לילדים
-                {'title': 'סט לגו Star Wars Millennium Falcon', 'description': 'סט הרכבה אייקוני לאספנים וחובבי הסדרה.', 'old_price': '800 ₪', 'new_price': '680 ₪', 'deal_link': '#', 'coupon_code': 'LEGOFUN', 'category': 'לילדים'},
-                {'title': 'בוסטר לרכב Graco TurboBooster', 'description': 'מושב בטיחות נוח ובטוח לילדים.', 'old_price': '350 ₪', 'new_price': '250 ₪', 'deal_link': '#', 'coupon_code': 'GRACOKID', 'category': 'לילדים'},
-            ]
-            for deal_info in deals_data:
-                deal = Deal(**deal_info)
-                db.session.add(deal)
+    if Deal.query.first() is None:
+        deals_data = [
+            # קטגוריה: מחשבים וציוד היקפי
+            {'title': 'כרטיס מסך GeForce RTX 4070', 'description': 'KSP - כרטיס מסך עוצמתי לגיימינג.', 'old_price': '3,500 ₪', 'new_price': '2,899 ₪', 'deal_link': '#', 'coupon_code': 'MEGA150', 'category': 'מחשבים וציוד היקפי'},
+            {'title': 'כיסא גיימינג Secretlab Titan', 'description': 'הכיסא האולטימטיבי לגיימרים וליוצרי תוכן.', 'old_price': '2,500 ₪', 'new_price': '2,100 ₪', 'deal_link': '#', 'coupon_code': 'GAMINGX', 'category': 'מחשבים וציוד היקפי'},
+            {'title': 'מסך מחשב Dell UltraSharp U2723QE', 'description': 'מסך 4K עם דיוק צבעים מדהים למקצוענים.', 'old_price': '3,800 ₪', 'new_price': '3,100 ₪', 'deal_link': '#', 'coupon_code': 'DELLPRO', 'category': 'מחשבים וציוד היקפי'},
+            {'title': 'מקלדת מכנית Logitech MX Mechanical', 'description': 'מקלדת אלחוטית, שקטה ומדויקת.', 'old_price': '700 ₪', 'new_price': '550 ₪', 'deal_link': '#', 'coupon_code': 'LOGI20', 'category': 'מחשבים וציוד היקפי'},
             
-            db.session.commit()
-            print("Database seeded with new sample deals.")
+            # קטגוריה: אוזניות וסאונד
+            {'title': 'אוזניות Sony WH-1000XM5', 'description': 'Amazon US - מבטלות רעשים מהטובות בעולם.', 'old_price': '1,800 ₪', 'new_price': '1,250 ₪', 'deal_link': '#', 'coupon_code': 'SONYDEAL', 'category': 'אוזניות וסאונד'},
+            {'title': 'רמקול Bluetooth נייד JBL Flip 6', 'description': 'רמקול עמיד למים עם סאונד עוצמתי.', 'old_price': '500 ₪', 'new_price': '380 ₪', 'deal_link': '#', 'coupon_code': 'JBLFLIP', 'category': 'אוזניות וסאונד'},
+            
+            # קטגוריה: מוצרי חשמל לבית
+            {'title': 'שואב אבק Roborock S8', 'description': 'Aliexpress - הדור החדש של השואבים הרובוטיים.', 'old_price': '3,200 ₪', 'new_price': '2,450 ₪', 'deal_link': '#', 'coupon_code': 'MEGA200', 'category': 'מוצרי חשמל לבית'},
+            {'title': 'מכונת קפה Nespresso', 'description': 'LastPrice - מכונת קפה מעוצבת ואיכותית.', 'old_price': '800 ₪', 'new_price': '550 ₪', 'deal_link': '#', 'coupon_code': 'COFFEE10', 'category': 'מוצרי חשמל לבית'},
+            {'title': 'בלנדר מוט Braun MultiQuick 9', 'description': 'בלנדר עוצמתי עם שלל אביזרים נלווים.', 'old_price': '600 ₪', 'new_price': '450 ₪', 'deal_link': '#', 'coupon_code': 'BRAUN25', 'category': 'מוצרי חשמל לבית'},
+            {'title': 'מטהר אוויר Xiaomi Smart Air Purifier 4', 'description': 'שומר על אוויר נקי בבית, שליטה מהאפליקציה.', 'old_price': '750 ₪', 'new_price': '600 ₪', 'deal_link': '#', 'coupon_code': 'AIRPURE', 'category': 'מוצרי חשמל לבית'},
+
+            # קטגוריה: ספורט וטיולים
+            {'title': 'נעלי ריצה ASICS Gel-Kayano', 'description': 'Amazon DE - נעלי ריצה מקצועיות למרחקים.', 'old_price': '750 ₪', 'new_price': '580 ₪', 'deal_link': '#', 'coupon_code': 'RUN4U', 'category': 'ספורט וטיולים'},
+            {'title': 'שעון חכם Garmin Fenix 7', 'description': 'שעון ספורט מתקדם עם GPS ומפות מובנות.', 'old_price': '3,000 ₪', 'new_price': '2,550 ₪', 'deal_link': '#', 'coupon_code': 'GARMIN15', 'category': 'ספורט וטיולים'},
+            {'title': 'תרמיל טיולים Osprey Atmos AG 65', 'description': 'תרמיל נוח ומאוורר לטרקים ארוכים.', 'old_price': '1,200 ₪', 'new_price': '950 ₪', 'deal_link': '#', 'coupon_code': 'OSPREY10', 'category': 'ספורט וטיולים'},
+
+            # קטגוריה: סלולר
+            {'title': 'סמארטפון Samsung Galaxy S24', 'description': 'Ivory - מכשיר הדגל החדש של סמסונג.', 'old_price': '4,200 ₪', 'new_price': '3,800 ₪', 'deal_link': '#', 'coupon_code': 'GALAXY5', 'category': 'סלולר'},
+            {'title': 'מטען נייד Anker PowerCore 20000', 'description': 'סוללה ניידת עוצמתית עם טעינה מהירה.', 'old_price': '250 ₪', 'new_price': '180 ₪', 'deal_link': '#', 'coupon_code': 'ANKERDEAL', 'category': 'סלולר'},
+            {'title': 'מגן מסך Spigen Glas.tR EZ Fit', 'description': 'מגן זכוכית איכותי עם התקנה קלה.', 'old_price': '120 ₪', 'new_price': '80 ₪', 'deal_link': '#', 'coupon_code': 'SPIGEN10', 'category': 'סלולר'},
+
+            # קטגוריה: טיפוח ויופי
+            {'title': 'מכונת גילוח Philips Series 9000', 'description': 'גילוח צמוד ונוח, מתאים לעור רגיש.', 'old_price': '900 ₪', 'new_price': '650 ₪', 'deal_link': '#', 'coupon_code': 'SHAVEUP', 'category': 'טיפוח ויופי'},
+            {'title': 'מייבש שיער Dyson Supersonic', 'description': 'מייבש שיער מהיר ושקט, מונע נזקי חום.', 'old_price': '2,000 ₪', 'new_price': '1,650 ₪', 'deal_link': '#', 'coupon_code': 'DYSON100', 'category': 'טיפוח ויופי'},
+            
+            # קטגוריה: לילדים
+            {'title': 'סט לגו Star Wars Millennium Falcon', 'description': 'סט הרכבה אייקוני לאספנים וחובבי הסדרה.', 'old_price': '800 ₪', 'new_price': '680 ₪', 'deal_link': '#', 'coupon_code': 'LEGOFUN', 'category': 'לילדים'},
+            {'title': 'בוסטר לרכב Graco TurboBooster', 'description': 'מושב בטיחות נוח ובטוח לילדים.', 'old_price': '350 ₪', 'new_price': '250 ₪', 'deal_link': '#', 'coupon_code': 'GRACOKID', 'category': 'לילדים'},
+        ]
+        for deal_info in deals_data:
+            deal = Deal(**deal_info)
+            db.session.add(deal)
+        
+        db.session.commit()
+        print("Database seeded with new sample deals.")
 
 if __name__ == '__main__':
-    create_and_seed_db()
     app.run(debug=True, port=5002) 
